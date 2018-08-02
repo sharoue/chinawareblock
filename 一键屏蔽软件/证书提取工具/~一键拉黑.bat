@@ -28,4 +28,3 @@ certutil -addstore -user -f ¡°Disallowed¡± %%s
 )
 
 
-pause
