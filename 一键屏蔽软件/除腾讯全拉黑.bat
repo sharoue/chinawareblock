@@ -42,9 +42,6 @@ cd ..
 cd .\证券炒股
 call ~一键拉黑.bat
 cd ..
-rem cd .\腾讯
-rem call ~一键拉黑.bat
-rem cd ..
 echo All Done!!!
 pause
 
