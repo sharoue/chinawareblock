@@ -21,6 +21,6 @@
 * 证书文件的命名方式是公司名-软件名-加密方式-到期日，所以如果到期日已经过了的证书，应该要留一下他们新的安装包，可能要补充新的拉黑了。
 
 # 证书提取工具
-* 感谢@EraserKing网友提供的C#程序和@rewqazxv网友提供的Powershell脚本，提供了提取exe文件数字签名的功能，这样拉黑的操作就更简单了。用法：将一个或多个流氓exe放在本目录，双击运行~GetCertFromFolder.exe，或者右键~GetCertFromFolder.ps1，选择“使用PowerShell”运行，过一阵子全部证书文件就被导出来，可以拿去分类拉黑了，或者干脆就地拉黑~~~
+* 感谢@EraserKing网友提供的C#程序和@rewqazxv网友提供的Powershell脚本，提供了提取exe文件数字签名的功能，这样拉黑的操作就更简单了。用法：将一个或多个流氓exe放在本目录，双击运行GetCertFromFolder.exe，或者右键GetCertFromFolder.ps1，选择“使用PowerShell”运行，过一阵子全部证书文件就被导出来，可以拿去分类拉黑了，或者干脆就地拉黑~~~
 
 # 需要扩充的功能
