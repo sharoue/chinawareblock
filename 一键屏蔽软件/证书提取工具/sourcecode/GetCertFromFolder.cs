@@ -1,12 +1,10 @@
-//Code by EraserKing (https://github.com/EraserKing)
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Cryptography.X509Certificates;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace GetCertFromFolder
 {
@@ -16,24 +14,31 @@ namespace GetCertFromFolder
 
         public static void Main(string[] args)
         {
-            string baseFolder = @".";
-            foreach (FileInfo fileInfo in new DirectoryInfo(baseFolder).EnumerateFiles("*.exe"))
+            string currentDirectory = Directory.GetCurrentDirectory();
+            foreach (FileInfo fileInfo in new DirectoryInfo(currentDirectory).EnumerateFiles("*.exe"))
             {
                 try
                 {
-                    X509Certificate cert = X509Certificate.CreateFromSignedFile(fileInfo.FullName);
-                    string certInBase64 = ExportToPEM(cert);
-
-                    string hash = cert.GetCertHashString();
-                    string issueTo = cert.Subject.Split(new string[] { ", " }, StringSplitOptions.None).FirstOrDefault(x => x.StartsWith("CN=")).Substring(3);
-                    string validTo = DateTime.Parse(cert.GetExpirationDateString()).ToString("yyyy-MM-dd");
-                    string certFileName = hash + "-" + issueTo + "-" + validTo + ".cer";
-
-                    File.WriteAllText(Path.Combine(baseFolder, removeInvalidCharInPath(certFileName)), certInBase64);
+                    X509Certificate2 cert = new X509Certificate2(X509Certificate.CreateFromSignedFile(fileInfo.FullName));
+                    string contents = Program.ExportToPEM(cert);
+                    string certHashString = cert.GetCertHashString();
+                    string friendlyName = cert.SignatureAlgorithm.FriendlyName;
+                    string issueTo = cert.Subject.Split(new string[]
+                    {
+                        ", "
+                    }, StringSplitOptions.None).FirstOrDefault((string x) => x.StartsWith("CN=")).Substring(3);
+                    string validTo = cert.NotAfter.ToString("yyyy-MM-dd");
+                    string path = string.Format("{0} - {1} - {2} - {3}.cer", new object[]
+                    {
+                        certHashString,
+                        friendlyName,
+                        issueTo,
+                        validTo
+                    });
+                    File.WriteAllText(Path.Combine(currentDirectory, Program.removeInvalidCharInPath(path)), contents);
                 }
                 catch (CryptographicException)
                 {
-                    continue;
                 }
             }
         }
@@ -49,14 +54,14 @@ namespace GetCertFromFolder
 
         private static string ExportToPEM(X509Certificate cert)
         {
-            StringBuilder builder = new StringBuilder();
-
-            builder.AppendLine("-----BEGIN CERTIFICATE-----");
-            builder.AppendLine(Convert.ToBase64String(cert.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks));
-            builder.AppendLine("-----END CERTIFICATE-----");
-
-            return builder.ToString();
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("-----BEGIN CERTIFICATE-----");
+            stringBuilder.AppendLine(Convert.ToBase64String(cert.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks));
+            stringBuilder.AppendLine("-----END CERTIFICATE-----");
+            return stringBuilder.ToString();
         }
-
     }
 }
+
+
+
