@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -12,38 +12,36 @@ namespace GetCertFromFolder
     {
         public static readonly string invalidChar = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
 
+        public static readonly string exeName = Process.GetCurrentProcess().MainModule.FileName;
+
         public static void Main(string[] args)
         {
-            string currentDirectory = Directory.GetCurrentDirectory();
-            foreach (FileInfo fileInfo in new DirectoryInfo(currentDirectory).EnumerateFiles("*.exe"))
+            string baseFolder = Directory.GetCurrentDirectory();
+            foreach (FileInfo fileInfo in new DirectoryInfo(baseFolder).EnumerateFiles("*.exe").Where(x => !x.Equals(exeName)))
             {
                 try
                 {
                     X509Certificate2 cert = new X509Certificate2(X509Certificate.CreateFromSignedFile(fileInfo.FullName));
-                    string contents = Program.ExportToPEM(cert);
-                    string certHashString = cert.GetCertHashString();
-                    string friendlyName = cert.SignatureAlgorithm.FriendlyName;
-                    string issueTo = cert.Subject.Split(new string[]
-                    {
-                        ", "
-                    }, StringSplitOptions.None).FirstOrDefault((string x) => x.StartsWith("CN=")).Substring(3);
+                    string certInBase64 = ExportToPEM(cert);
+
+                    string hash = cert.GetCertHashString();
+                    string alth = cert.SignatureAlgorithm.FriendlyName;
+                    string issueTo = cert.Subject.Substring(cert.Subject.IndexOf("CN=") + 3);
+                    issueTo = issueTo.Substring(0, issueTo.IndexOf('='));
+                    issueTo = issueTo.Substring(0, issueTo.LastIndexOf(','));
                     string validTo = cert.NotAfter.ToString("yyyy-MM-dd");
-                    string path = string.Format("{0} - {1} - {2} - {3}.cer", new object[]
-                    {
-                        certHashString,
-                        friendlyName,
-                        issueTo,
-                        validTo
-                    });
-                    File.WriteAllText(Path.Combine(currentDirectory, Program.removeInvalidCharInPath(path)), contents);
+                    string certFileName = $"{hash} - {alth} - {issueTo} - {validTo}.cer";
+
+                    File.WriteAllText(Path.Combine(baseFolder, RemoveInvalidCharInPath(certFileName)), certInBase64);
                 }
                 catch (CryptographicException)
                 {
+                    continue;
                 }
             }
         }
 
-        private static string removeInvalidCharInPath(string path)
+        private static string RemoveInvalidCharInPath(string path)
         {
             foreach (char c in invalidChar)
             {
@@ -54,14 +52,14 @@ namespace GetCertFromFolder
 
         private static string ExportToPEM(X509Certificate cert)
         {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("-----BEGIN CERTIFICATE-----");
-            stringBuilder.AppendLine(Convert.ToBase64String(cert.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks));
-            stringBuilder.AppendLine("-----END CERTIFICATE-----");
-            return stringBuilder.ToString();
+            StringBuilder builder = new StringBuilder();
+
+            builder.AppendLine("-----BEGIN CERTIFICATE-----");
+            builder.AppendLine(Convert.ToBase64String(cert.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks));
+            builder.AppendLine("-----END CERTIFICATE-----");
+
+            return builder.ToString();
         }
+
     }
 }
-
-
-
