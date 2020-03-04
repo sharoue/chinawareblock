@@ -24,3 +24,4 @@
 * 感谢@EraserKing网友提供的C#程序和@rewqazxv网友提供的Powershell脚本，提供了提取exe文件数字签名的功能，这样拉黑的操作就更简单了。用法：将一个或多个流氓exe放在本目录，双击运行GetCertFromFolder.exe，或者右键GetCertFromFolder.ps1，选择“使用PowerShell”运行，过一阵子全部证书文件就被导出来，可以拿去分类拉黑了，或者干脆就地拉黑~~~
 
 # 需要扩充的功能
+* 关于如何导出exe文件的全部证书，因为能力问题，只是找了下资料，然而没有去学习。先放这吧，免得有时间学的时候连资料都找不到了。https://www.sysadmins.lv/blog-en/reading-multiple-signatures-from-signed-file-with-powershell.aspx
